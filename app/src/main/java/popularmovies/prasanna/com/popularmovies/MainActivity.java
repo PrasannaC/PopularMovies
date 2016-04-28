@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null)
             getSupportFragmentManager().beginTransaction().replace(R.id.main_layout, movieFrag, "movie_tag").commit();
 
+
         //https://api.themoviedb.org/3/movie/550?api_key=c0cae73164556944a8b6f9599cc3df5f
 
 
