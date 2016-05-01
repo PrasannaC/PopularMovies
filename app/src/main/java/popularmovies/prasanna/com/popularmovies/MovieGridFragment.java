@@ -72,7 +72,7 @@ public class MovieGridFragment extends Fragment {
                 Intent i = new Intent(getContext(), MovieDetailActivity.class);
                 i.putExtra("movie", (Movie) adapterView.getItemAtPosition(position));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    List<Pair<View, String>> transitionPairs = new ArrayList<Pair<View, String>>();
+                    List<Pair<View, String>> transitionPairs = new ArrayList<>();
                     transitionPairs.add(Pair.create(view.findViewById(R.id.poster_image), "poster_pic"));
                     transitionPairs.add(Pair.create(view.findViewById(R.id.info_text), "movie_title"));
                     ActivityOptionsCompat options = ActivityOptionsCompat.
