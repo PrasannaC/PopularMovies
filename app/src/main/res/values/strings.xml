@@ -1,4 +1,25 @@
 <resources>
     <string name="app_name">Popular Movies</string>
     <string name="api_key">c0cae73164556944a8b6f9599cc3df5f</string>
+    <string name="action_settings">Settings</string>
+    <string name="content_desc_movie_poster">Movie Poster</string>
+    <string name="string_sort_by">Sort By</string>
+    <string name="string_popularity">Popularity</string>
+    <string name="string_highest_rated">Highest Rated</string>
+    <string name="string_release_date">Release Date:</string>
+    <string name="string_rating">Rating:</string>
+    <string name="string_original_title">Original Title:</string>
+    <string name="string_cd_backdrop">Backdrop</string>
+    <string name="string_cd_movie_poster">Movie Poster</string>
+    <string name="string_cd_trailer">Trailer</string>
+    <string name="string_trailers">Trailers and Clips:</string>
+    <string name="string_reviews">Reviews:</string>
+    <string name="string_review_format" formatted="false">Author: %s \n\n%s…\n\n(Click to view rest)</string>
+    <string name="string_no_reviews">No reviews yet.</string>
+    <string name="string_favorite">Favorite</string>
+    <string name="string_menu_favorites_only">Favorites Only</string>
+    <string name="string_no_favorites">No favorites.</string>
+    <string name="string_review_network_error">Network Error.</string>
+    <string name="string_share_trailer">Share Trailer</string>
+    <string name="string_trailer_not_loaded">Trailers not loaded.</string>
 </resources>

@@ -1,22 +1,30 @@
 package popularmovies.prasanna.com.popularmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import popularmovies.prasanna.com.popularmovies.Model.Movie;
 import popularmovies.prasanna.com.popularmovies.Model.MovieResults;
@@ -39,39 +47,75 @@ public class MovieGridFragment extends Fragment {
         // constructor
     }
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        View v = inflater.inflate(R.layout.movie_grid, container, false);
         FetchMoviesTask asyncTask = new FetchMoviesTask(getContext());
+        setHasOptionsMenu(true);
+        View v = inflater.inflate(R.layout.movie_grid, container, false);
         NetworkInfo networkInfo = ((ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             asyncTask.execute(FetchMoviesTask.SORT_BY_POPULARITY);
-            try {
-                movies = asyncTask.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-
         } else {
             Toast.makeText(getContext(), "Network Unavailable", Toast.LENGTH_SHORT).show();
         }
 
-        //TEST CODE -- OBSOLETE
-        /*TextView tv = (TextView) v.findViewById(R.id.listTest);
-        if (movies != null)
-            tv.setText(movies.get(0).getOriginalTitle());*/
 
         movieGridView = (GridView) v.findViewById(R.id.movie_gridView);
         movieGridAdapter = new GridAdapter(getContext(), new ArrayList<Movie>());
         movieGridView.setAdapter(movieGridAdapter);
 
+        movieGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent i = new Intent(getContext(), MovieDetailActivity.class);
+                i.putExtra("movie", (Movie) adapterView.getItemAtPosition(position));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    List<Pair<View, String>> transitionPairs = new ArrayList<Pair<View, String>>();
+                    transitionPairs.add(Pair.create(view.findViewById(R.id.poster_image), "poster_pic"));
+                    transitionPairs.add(Pair.create(view.findViewById(R.id.info_text), "movie_title"));
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(getActivity(), transitionPairs.toArray(new Pair[transitionPairs.size()]));
+                    ActivityCompat.startActivity(getActivity(), i, options.toBundle());
+                } else {
+                    startActivity(i);
+                }
+            }
+        });
+
         return v;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        NetworkInfo networkInfo = ((ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        FetchMoviesTask asyncTask = new FetchMoviesTask(getContext());
+        switch (item.getItemId()) {
+            case R.id.sort_by_popularity:
+                if (networkInfo != null && networkInfo.isConnected()) {
+                    asyncTask.execute(FetchMoviesTask.SORT_BY_POPULARITY);
+                } else {
+                    Toast.makeText(getContext(), "Network Unavailable", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.sort_by_rating:
+                if (networkInfo != null && networkInfo.isConnected()) {
+                    asyncTask.execute(FetchMoviesTask.SORT_BY_RATING);
+                } else {
+                    Toast.makeText(getContext(), "Network Unavailable", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.movie_menu, menu);
+    }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, List<Movie>> {
 
