@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Popular Movies</string>
-    <string name="api_key">c0cae73164556944a8b6f9599cc3df5f</string>
     <string name="action_settings">Settings</string>
     <string name="content_desc_movie_poster">Movie Poster</string>
     <string name="string_sort_by">Sort By</string>
