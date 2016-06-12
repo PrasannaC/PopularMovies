@@ -18,7 +18,7 @@ public class Movie implements Serializable {
     private String releaseDate;
     @SerializedName("id")
     @Expose
-    private int id;
+    private long id;
     @SerializedName("original_title")
     @Expose
     private String originalTitle;
@@ -38,8 +38,17 @@ public class Movie implements Serializable {
     @Expose
     private double voteAverage;
 
-    public Movie() {
+    public Movie(String title, String description, String posterPath, String relDate, long id, String origTitle, String backdropPath, String voteAvg) {
+        this.title = title;
+        this.overview = description;
+        this.posterPath = posterPath;
+        this.releaseDate = relDate;
+        this.id = id;
+        this.originalTitle = origTitle;
+        this.backdropPath = backdropPath;
+        this.voteAverage = Double.parseDouble(voteAvg);
     }
+
 
     public Movie(String posterPath, String overview, String releaseDate, int id, String originalTitle, String title, String backdropPath, double popularity, int voteCount, double voteAverage) {
         this.posterPath = posterPath;
@@ -78,11 +87,11 @@ public class Movie implements Serializable {
         this.releaseDate = releaseDate;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

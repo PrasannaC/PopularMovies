@@ -19,8 +19,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".MovieDetailActivity">
-
         </activity>
+
+        <provider
+            android:name=".Persistence.generated.FavoritesProvider"
+            android:authorities="popularmovies.prasanna.com.popularmovies"
+            android:exported="false" />
     </application>
 
 </manifest>

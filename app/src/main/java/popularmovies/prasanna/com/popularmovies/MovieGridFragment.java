@@ -2,12 +2,15 @@ package popularmovies.prasanna.com.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -28,6 +31,9 @@ import java.util.List;
 
 import popularmovies.prasanna.com.popularmovies.Model.Movie;
 import popularmovies.prasanna.com.popularmovies.Model.MovieResults;
+import popularmovies.prasanna.com.popularmovies.Persistence.DBContract;
+import popularmovies.prasanna.com.popularmovies.Persistence.DBHelper;
+import popularmovies.prasanna.com.popularmovies.Persistence.FavoritesProvider;
 import popularmovies.prasanna.com.popularmovies.WebServices.WebHelper;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -63,6 +69,9 @@ public class MovieGridFragment extends Fragment {
 
 
         movieGridView = (GridView) v.findViewById(R.id.movie_gridView);
+        if (movies == null) {
+
+        }
         movieGridAdapter = new GridAdapter(getContext(), new ArrayList<Movie>());
         movieGridView.setAdapter(movieGridAdapter);
 
@@ -106,6 +115,8 @@ public class MovieGridFragment extends Fragment {
                     Toast.makeText(getContext(), "Network Unavailable", Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case R.id.favoritesOnly:
+                new DbReader(getContext()).execute();
         }
 
         return true;
@@ -162,6 +173,84 @@ public class MovieGridFragment extends Fragment {
                 if (networkError) {
                     Toast.makeText(mContext, "Network error", Toast.LENGTH_SHORT).show();
                 }
+            }
+        }
+    }
+
+    public class DbReader extends AsyncTask<Void, Void, List<Movie>> {
+
+        private Context mContext;
+
+        public DbReader(Context mContext) {
+            this.mContext = mContext;
+        }
+
+        @Override
+        protected List<Movie> doInBackground(Void... params) {
+
+            DBHelper dbHelper = new DBHelper(mContext);
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+            List<Movie> movieList = new ArrayList<>();
+
+            Cursor c = mContext.getContentResolver().query(FavoritesProvider.Movies.CONTENT_URI, null, null, null, null);
+
+            if (c != null) {
+                int colTmdbId = c.getColumnIndex(DBContract.MovieEntry.COL_TMDB_ID);
+                int colTitle = c.getColumnIndex(DBContract.MovieEntry.COL_TITLE);
+                int colDesc = c.getColumnIndex(DBContract.MovieEntry.COL_DESC);
+                int colPoster = c.getColumnIndex(DBContract.MovieEntry.COL_POSTER_PATH);
+                int colRelDate = c.getColumnIndex(DBContract.MovieEntry.COL_REL_DATE);
+                int colOgTitle = c.getColumnIndex(DBContract.MovieEntry.COL_ORIGINAL_TITLE);
+                int colBackdrop = c.getColumnIndex(DBContract.MovieEntry.COL_BACKDROP_PATH);
+                int colVoteAvg = c.getColumnIndex(DBContract.MovieEntry.COL_VOTE_AVG);
+
+                if (c.moveToFirst()) {
+                    movieList.add(new Movie(c.getString(colTitle),
+                            c.getString(colDesc),
+                            c.getString(colPoster),
+                            c.getString(colRelDate),
+                            c.getLong(colTmdbId),
+                            c.getString(colOgTitle),
+                            c.getString(colBackdrop),
+                            c.getString(colVoteAvg)));
+                }
+
+                while (c.moveToNext()) {
+                    movieList.add(new Movie(c.getString(colTitle),
+                            c.getString(colDesc),
+                            c.getString(colPoster),
+                            c.getString(colRelDate),
+                            c.getLong(colTmdbId),
+                            c.getString(colOgTitle),
+                            c.getString(colBackdrop),
+                            c.getString(colVoteAvg)));
+                }
+
+                c.close();
+            }
+            db.close();
+
+            return movieList;
+        }
+
+        @Override
+        protected void onPostExecute(List<Movie> moviesResult) {
+            super.onPostExecute(moviesResult);
+            if (moviesResult != null && !moviesResult.isEmpty()) {
+                movieGridAdapter.clear();
+                movieGridAdapter.addAll(moviesResult);
+                movieGridAdapter.notifyDataSetChanged();
+                movieGridView.invalidate();
+            } else {
+                final Snackbar s = Snackbar.make(MovieGridFragment.this.movieGridView, R.string.string_no_favorites, Snackbar.LENGTH_INDEFINITE);
+                s.setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        s.dismiss();
+                    }
+                });
+                s.show();
             }
         }
     }
