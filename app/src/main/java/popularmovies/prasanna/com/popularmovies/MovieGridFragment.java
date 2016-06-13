@@ -45,14 +45,24 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class MovieGridFragment extends Fragment {
 
+    public static final String SPLIT_PLANE = "split_pane";
     public List<Movie> movies = null;
     public GridView movieGridView;
     public GridAdapter movieGridAdapter;
+    private boolean mMultiPane = false;
+    private MovieDetailFragment detailFragment = null;
 
     public MovieGridFragment() {
         // constructor
     }
 
+    public static MovieGridFragment getInstance(boolean mMultiPane) {
+        MovieGridFragment movieFragment = new MovieGridFragment();
+        Bundle b = new Bundle();
+        b.putBoolean(SPLIT_PLANE, mMultiPane);
+        movieFragment.setArguments(b);
+        return movieFragment;
+    }
 
     @Nullable
     @Override
@@ -67,6 +77,8 @@ public class MovieGridFragment extends Fragment {
             Toast.makeText(getContext(), "Network Unavailable", Toast.LENGTH_SHORT).show();
         }
 
+        mMultiPane = getArguments().containsKey(SPLIT_PLANE) ? getArguments().getBoolean(SPLIT_PLANE) : false;
+
 
         movieGridView = (GridView) v.findViewById(R.id.movie_gridView);
         if (movies == null) {
@@ -78,6 +90,12 @@ public class MovieGridFragment extends Fragment {
         movieGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+
+                if (mMultiPane) {
+                    detailFragment = MovieDetailFragment.getInstance((Movie) adapterView.getItemAtPosition(position));
+                    getFragmentManager().beginTransaction().replace(R.id.detail_layout, detailFragment).addToBackStack(null).commit();
+                    return;
+                }
                 Intent i = new Intent(getContext(), MovieDetailActivity.class);
                 i.putExtra("movie", (Movie) adapterView.getItemAtPosition(position));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -117,6 +135,14 @@ public class MovieGridFragment extends Fragment {
                 break;
             case R.id.favoritesOnly:
                 new DbReader(getContext()).execute();
+                break;
+            // FOR SOME REASON THE ACTION ITEM CLICKS FROM SECOND FRAGMENT WERE TRIGGERING THE LISTENER IN THIS FRAGMENT.
+            // I WOULD LOVE TO KNOW WHY. DIDN'T FIND ANYTHING ON GOOGLE/SO.
+            // I SUSPECT IT IS BECAUSE OF THE COMMON ACTIONBAR? WOULD A TOOLBAR SOLVE IT?
+            case R.id.fav_btn:
+                return detailFragment != null ? detailFragment.onOptionsItemSelected(item) : true;
+            case R.id.share_btn:
+                return detailFragment != null ? detailFragment.onOptionsItemSelected(item) : true;
         }
 
         return true;

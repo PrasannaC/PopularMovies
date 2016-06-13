@@ -135,6 +135,7 @@ public class MovieDetailFragment extends Fragment {
 
         if (c != null) c.close();
 
+        parentView = v;
 
         return v;
     }
